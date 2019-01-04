@@ -22,8 +22,8 @@ report_status() {
 usage() {
   report_status "$(cat <<-EOS
 		usage: check_gitlfs -u <git repo url> -I <path to object>
-		 -u [GIT REPO URL] -- Run in batch mode. Do not ask any questions and install all extra
-		 -I [PATH LFS OBJECT] -- Attempt to continue a previously failed install.
+		 -u [GIT REPO URL] -- URL to clone git repo from.
+		 -I [PATH LFS OBJECT] -- Path to lfs backed file within repo.
 		 -h -- Display this help message.
 
 		example:
