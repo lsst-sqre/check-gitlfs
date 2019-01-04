@@ -1,6 +1,8 @@
 check_gitlfs
 ===
 
+[![Build Status](https://travis-ci.org/lsst-sqre/check-gitlfs.svg?branch=master)](https://travis-ci.org/lsst-sqre/check-gitlfs)
+
 A nagios/icinga/sensu "plugin" for checking the function of a git lfs backed
 repo.  IOW - check that a git lfs service is returning objects.
 
