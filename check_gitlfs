@@ -1,0 +1,74 @@
+#!/bin/bash
+
+set -e
+
+# nagios/icinga status messages should always go to stdout
+report_status() {
+  local code=${2:-1}
+
+	local status
+	case $code in
+		0) status='OK';;
+		1) status='WARNING';;
+		2) status='CRITICAL';;
+		3|*) status='UNKNOWN';;
+	esac
+  echo -e "${status}- ${1}"
+
+  # shellcheck disable=SC2086
+  exit $code
+}
+
+usage() {
+  report_status "$(cat <<-EOS
+		usage: check_gitlfs -u <git repo url> -I <path to object>
+		 -u [GIT REPO URL] -- Run in batch mode. Do not ask any questions and install all extra
+		 -I [PATH LFS OBJECT] -- Attempt to continue a previously failed install.
+		 -h -- Display this help message.
+
+		example:
+			check_gitlfs  -u https://github.com/lsst/afwdata.git -I CFHT/D2/sdss.dat
+		EOS
+  )" 3
+}
+
+parse_args() {
+  local OPTIND
+  local opt
+
+  while getopts u:I:h opt; do
+    case $opt in
+      u)
+        CLFS_GIT_URL=$OPTARG
+        ;;
+      I)
+        CLFS_OBJ_PATH=$OPTARG
+        ;;
+      h|*)
+        usage
+        ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+}
+
+parse_args "$@"
+
+[[ -z $CLFS_GIT_URL ]] && report_status "-u is required." 3
+[[ -z $CLFS_OBJ_PATH ]] && report_status "-I is required." 3
+
+if output=$(set -Eeo pipefail
+  tmpdir=$(mktemp -d -t check_gitlfs-XXXXXXXX)
+  trap '{ rm -rf $tmpdir; }' EXIT
+  clonedir="${tmpdir}/repo"
+
+  GIT_LFS_SKIP_SMUDGE=1 git clone -q "$CLFS_GIT_URL" "$clonedir" 2>&1
+	# -C|--git-dir don't seem to work and changing the pwd seems to be required?
+  git lfs fetch origin -I "$CLFS_OBJ_PATH" 2>&1
+); then
+	report_status "$output" 0
+else
+	report_status "$output" 2
+fi
+
+# vim: tabstop=2 shiftwidth=2 expandtab
