@@ -28,7 +28,7 @@ usage() {
 
 		example:
 
-		  check_gitlfs  -u https://github.com/lsst/afwdata.git -I CFHT/D2/sdss.dat
+		  check_gitlfs -u https://github.com/lsst/afwdata.git -I CFHT/D2/sdss.dat
 		EOS
   )" 3
 }
